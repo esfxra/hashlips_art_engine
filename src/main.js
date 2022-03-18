@@ -20,6 +20,7 @@ const {
   namePrefix,
   network,
   solanaMetadata,
+  algorandMetadata,
   gif,
 } = require(`${basePath}/src/config.js`);
 const canvas = createCanvas(format.width, format.height);
@@ -165,6 +166,35 @@ const addMetadata = (_dna, _edition) => {
         category: "image",
         creators: solanaMetadata.creators,
       },
+    };
+  }
+  if(network == NETWORK.algo) {
+    // This helper function processes unit names
+    const transformAlgoUnitName = (unitName, editionNum) => {
+      if (editionNum < 10) {
+        return `${unitName}00${editionNum.toString()}`
+      }
+      if (editionNum < 100) {
+        return `${unitName}0${editionNum.toString()}`
+      }
+      return `${unitName}${editionNum.toString()}`
+    }
+
+    // Format attributes into properties compliant with arc69
+    const properties = {};
+    attributesList.forEach((attribute) => {
+      const { trait_type, value } = attribute
+      properties[trait_type] = value
+    })
+
+    tempMetadata = {
+      edition: tempMetadata.edition,
+      unitName: transformAlgoUnitName(algorandMetadata.unit_name, tempMetadata.edition),
+      standard: "arc69",
+      description: tempMetadata.description,
+      external_url: algorandMetadata.external_url,
+      mime_type: "image/png",
+      properties,
     };
   }
   metadataList.push(tempMetadata);

@@ -2,7 +2,7 @@ const basePath = process.cwd();
 const { MODE } = require(`${basePath}/constants/blend_mode.js`);
 const { NETWORK } = require(`${basePath}/constants/network.js`);
 
-const network = NETWORK.eth;
+const network = NETWORK.algo;
 
 // General metadata for Ethereum
 const namePrefix = "Your Collection";
@@ -20,6 +20,11 @@ const solanaMetadata = {
     },
   ],
 };
+
+const algorandMetadata = {
+  unit_name: "algofun",
+  external_url: "https://algofun.io",
+}
 
 // If you have selected Solana then the collection starts from 0 automatically
 const layerConfigurations = [
@@ -117,6 +122,7 @@ module.exports = {
   namePrefix,
   network,
   solanaMetadata,
+  algorandMetadata,
   gif,
   preview_gif,
 };
