@@ -1,8 +1,9 @@
 const basePath = process.cwd();
 const fs = require("fs");
+const { NETWORK } = require(`${basePath}/constants/network.js`);
 const layersDir = `${basePath}/layers`;
 
-const { layerConfigurations } = require(`${basePath}/src/config.js`);
+const { layerConfigurations, network } = require(`${basePath}/src/config.js`);
 
 const { getElements } = require("../src/main.js");
 
@@ -42,33 +43,55 @@ layerConfigurations.forEach((config) => {
   });
 });
 
-// fill up rarity chart with occurrences from metadata
-data.forEach((element) => {
-  let attributes = element.attributes;
-  attributes.forEach((attribute) => {
-    let traitType = attribute.trait_type;
-    let value = attribute.value;
+if (network === NETWORK.algo) {
+  // fill up rarity chart with occurrences from metadata
+  data.forEach((element) => {
+    let properties = element.properties;
+    for (const [key, value] of Object.entries(properties)) {
+      let traitType = key;
+      let traitValue = value;
 
-    let rarityDataTraits = rarityData[traitType];
-    rarityDataTraits.forEach((rarityDataTrait) => {
-      if (rarityDataTrait.trait == value) {
-        // keep track of occurrences
-        rarityDataTrait.occurrence++;
-      }
+      let rarityDataTraits = rarityData[traitType];
+      rarityDataTraits.forEach((rarityDataTrait) => {
+        if (rarityDataTrait.trait == traitValue) {
+          // keep track of occurrences
+          rarityDataTrait.occurrence++;
+        }
+      });
+    }
+  });
+} else {
+  // fill up rarity chart with occurrences from metadata
+  data.forEach((element) => {
+    let attributes = element.attributes;
+    attributes.forEach((attribute) => {
+      let traitType = attribute.trait_type;
+      let value = attribute.value;
+
+      let rarityDataTraits = rarityData[traitType];
+      rarityDataTraits.forEach((rarityDataTrait) => {
+        if (rarityDataTrait.trait == value) {
+          // keep track of occurrences
+          rarityDataTrait.occurrence++;
+        }
+      });
     });
   });
-});
+}
 
 // convert occurrences to occurence string
 for (var layer in rarityData) {
   for (var attribute in rarityData[layer]) {
     // get chance
-    let chance =
-      ((rarityData[layer][attribute].occurrence / editionSize) * 100).toFixed(2);
+    let chance = (
+      (rarityData[layer][attribute].occurrence / editionSize) *
+      100
+    ).toFixed(2);
 
     // show two decimal places in percent
-    rarityData[layer][attribute].occurrence =
-      `${rarityData[layer][attribute].occurrence} in ${editionSize} editions (${chance} %)`;
+    rarityData[layer][
+      attribute
+    ].occurrence = `${rarityData[layer][attribute].occurrence} in ${editionSize} editions (${chance} %)`;
   }
 }
 
@@ -78,5 +101,4 @@ for (var layer in rarityData) {
   for (var trait in rarityData[layer]) {
     console.log(rarityData[layer][trait]);
   }
-  console.log();
 }
