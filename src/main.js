@@ -112,8 +112,13 @@ const layersSetup = (layersOrder) => {
 };
 
 const saveImage = (_editionCount) => {
+  const fileName = NETWORK.algo ? writeAlgorandUnitName(
+    algorandMetadata.unit_name,
+    _editionCount
+  ) : _editionCount;
+
   fs.writeFileSync(
-    `${buildDir}/images/${_editionCount}.png`,
+    `${buildDir}/images/${fileName}.png`,
     canvas.toBuffer("image/png")
   );
 };
@@ -168,28 +173,20 @@ const addMetadata = (_dna, _edition) => {
       },
     };
   }
-  if(network == NETWORK.algo) {
-    // This helper function processes unit names
-    const transformAlgoUnitName = (unitName, editionNum) => {
-      if (editionNum < 10) {
-        return `${unitName}00${editionNum.toString()}`
-      }
-      if (editionNum < 100) {
-        return `${unitName}0${editionNum.toString()}`
-      }
-      return `${unitName}${editionNum.toString()}`
-    }
-
+  if (network == NETWORK.algo) {
     // Format attributes into properties compliant with arc69
     const properties = {};
     attributesList.forEach((attribute) => {
-      const { trait_type, value } = attribute
-      properties[trait_type] = value
-    })
+      const { trait_type, value } = attribute;
+      properties[trait_type] = value;
+    });
 
     tempMetadata = {
       edition: tempMetadata.edition,
-      unitName: transformAlgoUnitName(algorandMetadata.unit_name, tempMetadata.edition),
+      unitName: writeAlgorandUnitName(
+        algorandMetadata.unit_name,
+        tempMetadata.edition
+      ),
       standard: "arc69",
       description: tempMetadata.description,
       external_url: algorandMetadata.external_url,
@@ -362,6 +359,23 @@ function shuffle(array) {
     ];
   }
   return array;
+}
+
+function writeAlgorandUnitName(unitName, editionNum) {
+  // This helper function processes unit names
+  if (editionNum < 10) {
+    return `${unitName}0000${editionNum.toString()}`;
+  }
+  if (editionNum < 100) {
+    return `${unitName}000${editionNum.toString()}`;
+  }
+  if (editionNum < 1000) {
+    return `${unitName}00${editionNum.toString()}`;
+  }
+  if (editionNum < 10000) {
+    return `${unitName}0${editionNum.toString()}`;
+  }
+  return `${unitName}${editionNum.toString()}`;
 }
 
 const startCreating = async () => {
